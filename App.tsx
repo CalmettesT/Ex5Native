@@ -19,37 +19,25 @@ const App = () => {
   setNoteText(''); // Réinitialiser le TextInput après l'ajout
 };
 
-// const handleDeleteNoteConfirmation = (noteId :any) => {
+// const handleDeleteNoteConfirmation = (noteId: any) => {
 //   Alert.alert(
 //     "Confirmation",
 //     "Êtes-vous sûr de vouloir supprimer cette note ?",
 //     [
-//       {
-//         text: "Non",
-//         style: "cancel"
-//       },
+//       { text: "Non", style: "cancel" },
 //       { text: "Oui", onPress: () => handleDeleteNote(noteId) }
 //     ]
 //   );
 // };
 
-// const handleDeleteNote = (noteId :any) => {
+// const handleDeleteNote = (noteId: any) => {
 //   // Logique pour supprimer la note
-//   console.log("Suppression de la note avec l'ID:", noteId);
-//   // Mettez à jour l'état de vos notes ici
 // };
 
  
- const syncData = () => {
-  NetInfo.fetch().then(state => {
-    if (state.isConnected) {
-      console.log("Connexion : ", state.isConnected);
-      // Logique Api
-      console.log("Synchronisation des notes avec l'API");
-    } else {
-      console.log("Il n'y a pas encore de connaxion : ", state.isConnected);
-    }
-  });
+const syncData = () => {
+  console.log("Synchronisation des notes avec l'API");
+  // Ajouter logique d'envoi des notes à l'API ici
 };
 
   useEffect(() => {
@@ -64,29 +52,37 @@ const App = () => {
  
     loadNotes();
 
-   // Vérification périodique de la connexion Internet pour synchroniser les datas
-   const intervalId = setInterval(syncData, 10000); // Vérifiez toutes les 10 secondes
+   // Écoute les changements d'état de la connexion
+   const unsubscribe = NetInfo.addEventListener(state => {
+    if (state.isConnected) {
+      console.log("Connecté");
+      syncData(); // Synchronisez les données seulement quand l'état passe à connecté
+    } else {
+      console.log("Pas de connexion");
+    }
+  });
 
-   // Nettoyage de l'intervalle lors du démontage du composant
-   return () => clearInterval(intervalId);
+  return () => unsubscribe();
   }, []);
 
 
   return (
   // Interface utilisateur pour ajouter et afficher les notes
   <View>
-     <TextInput
-       placeholder="Écrivez votre note ici"
-       value={noteText}
-       onChangeText={setNoteText}
-     />
-     <Button title="Ajouter une note" onPress={handleAddNote} />
-     <FlatList
-       data={notes}
-       keyExtractor={(item, index) => 'note-' + index}
-       renderItem={({ item }) => <Text style={{ padding: 10 }}>{item}</Text>}
-     />
-   </View>
+      <TextInput
+        placeholder="Écrivez votre note ici"
+        value={noteText}
+        onChangeText={setNoteText}
+      />
+      <Button title="Ajouter une note" onPress={handleAddNote} />
+      <FlatList
+        data={notes}
+        keyExtractor={(item, index) => 'note-' + index}
+        renderItem={({ item }) => (
+          <Text style={{ padding: 3 }}>{item}</Text>
+        )}
+      />
+    </View>
   );
  };
 
